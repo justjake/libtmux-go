@@ -11,7 +11,7 @@ func (c Client) String() string {
 	return c.TTY
 }
 
-func GetAllClient() []Client {
+func GetAllClients() []Client {
 	s := Run("list-clients", "-F", "#{client_tty}")
 	ttys := strings.Split(strings.TrimSpace(s), "\n")
 	clients := make([]Client, len(ttys))
