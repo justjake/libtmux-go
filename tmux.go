@@ -4,15 +4,31 @@ package tmux
 import (
 	"log"
 	"os/exec"
+	"strconv"
+	"time"
 )
 
 const (
 	baseCommand = "tmux"
 )
 
-func Display(message string, clients ...Client) {
+func Display(message string, options *DisplayOptions, clients ...*Client) {
+	storedOptions := make([]*DisplayOptions, len(clients))
 	for i := range clients {
-		Run("display", "-c", clients[i].TTY, message)
+		session := clients[i].CurrentSession
+		storedOptions[i] = session.GetDisplayOptions()
+		session.ApplyDisplayOptions(options)
+		clients[i].Display(message)
+	}
+	milli, err := strconv.Atoi(options.Time)
+	if err != nil {
+		log.Fatal(err)
+	}
+	time.Sleep(time.Duration(milli) * time.Millisecond)
+
+	for i := range clients {
+		session := clients[i].CurrentSession
+		session.ApplyDisplayOptions(storedOptions[i])
 	}
 }
 
